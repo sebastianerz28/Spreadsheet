@@ -1,0 +1,15 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "task-NewFile",
+      "appliesTo": "Spreadsheet/FormulaEvaluator/NewFile",
+      "type": "launch"
+    },
+    {
+      "taskLabel": "task-Class1",
+      "appliesTo": "Spreadsheet/FormulaEvaluator/Class1.cs",
+      "type": "launch"
+    }
+  ]
+}
