@@ -16,7 +16,7 @@ namespace FormulaEvaluator
                 if(Char.IsDigit(substrings[i]))
                     if (operators.Peek.equals("*") || operators.Peek.equals("/"))
                     {
-                        
+                        x = 1 + 1;            
                     }
             }
         }
@@ -30,6 +30,7 @@ namespace FormulaEvaluator
                 return a * b;
             else 
                 return a / b;
+            
         }
       
     }
