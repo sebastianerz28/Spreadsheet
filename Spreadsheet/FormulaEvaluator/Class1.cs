@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections
-using System.Text.RegularExpressions
+using System.Collections;
+using System.Text.RegularExpressions;
 namespace FormulaEvaluator
 {
     public static class Evaluator
     {
-        public static void Main(string[] args)
-        {
-            Console.WriteLine("Test");
-        }
         public delegate int Lookup(String v);
-        Stack vals = new Stack();
-        Stack operators = new Stack();
+        
         public static int Evaluate(String exp, Lookup variableEvaluator)
         {
+            Stack vals = new Stack();
+            Stack operators = new Stack();
             string[] substrings = Regex.Split(s, "(\()|(\))|(-)|(\+)|(\*)|(/)");
             for (int i = 0; i < substrings.Length; i++)
             {
@@ -21,9 +18,9 @@ namespace FormulaEvaluator
                 {
                     if (vals.Count == 0)
                         throw new ArgumentException("No values to compute");
-                    else if (vals.Peek == 0 && int.Parse(substrings[i]) == 0 && operators.Peek == "/")
+                    else if (vals.Peek().Equals(0) && int.Parse(substrings[i]) == 0 && operators.Peek() == "/")
                         throw new ArithmeticException("divide by 0");
-                    else if (operators.Peek.equals("*") || operators.Peek.equals("/"))
+                    else if (operators.Peek().Equals("*") || operators.Peek().Equals("/"))
                     {
                         vals.Push(Evaluator.Calculate(int.Parse(substrings[i]), vals.Pop(), operators.Pop());
                     }
@@ -55,17 +52,11 @@ namespace FormulaEvaluator
                         {
                             int x = vals.Pop;
                             iny y = vals.Pop;
-
                             vals.Push(Calculate(x, y, substrings[i]));
                         }
-
                     }
                     else
                         operators.Push(substrings[i]);
-
-
-
-
                 }
                 else if (substrings[i] == "*" || substrings[i] == "/")
                 {
@@ -77,7 +68,7 @@ namespace FormulaEvaluator
                 }
                 else if (substrings[i] == ")")
                 {
-                    if(operators.Peek == "+" || operators.Peek == "-")
+                    if (operators.Peek == "+" || operators.Peek == "-")
                     {
                         if (vals.Count < 2)
                             throw new ArgumentException("Not enough values");
@@ -94,9 +85,9 @@ namespace FormulaEvaluator
                     }
                     else
                         throw new ArgumentException("Expected left parenthesis: ( but was different");
-                    if(operators.Peek.equals("*") || operators.Peek.equals("/"))
+                    if (operators.Peek.equals("*") || operators.Peek.equals("/"))
                     {
-                        if(vals.Count < 2)
+                        if (vals.Count < 2)
                             throw new ArgumentException("Not enough values");
                         int x = vals.Pop;
                         iny y = vals.Pop;
@@ -130,9 +121,9 @@ namespace FormulaEvaluator
         }
         private static int Calculate(int a, int b, String op)
         {
-            if (op.Equals("+");
+            if (op.Equals("+"))
             return a + b;
-            else if (op.Equals("-")
+            else if (op.Equals("-"))
                 return a - b;
             else if op.Equals("*")
                 return a * b;
@@ -148,8 +139,8 @@ namespace FormulaEvaluator
                 if (Char.IsLetter(s[i]) && letters == true)
                     continue;
                 else if (Char.IsLetter(s[i]) == false && letters == true)
-                    letters == false
-                else if (letters == false && Char.IsDigit(s[i])
+                    letters = false;
+                else if (letters == false && Char.IsDigit(s[i]))
                 {
                     continue;
                 }
