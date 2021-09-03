@@ -153,6 +153,13 @@ namespace FormulaEvaluator
             }
 
         }
+        /// <summary>
+        /// Method that does basic operations to the values 
+        /// </summary>
+        /// <param name="a">right operator</param>
+        /// <param name="b">left operator</param>
+        /// <param name="op"> operatr to be performed</param>
+        /// <returns> returns the value </returns>
         private static int Calculate(int a, int b, String op)
         {
             if (op.Equals("+"))

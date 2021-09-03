@@ -49,7 +49,7 @@ namespace EvalTester
             //Console.WriteLine(Evaluate("(1+2) /0", l));
             //Console.WriteLine("Exception should be thrown: " + Evaluate("==", l));
             //Console.WriteLine("ExceptionShould be thrown Expression was" + Evaluate("3x + 3", l));
-            Console.WriteLine(Evaluate("2 2", l));
+            //Console.WriteLine(Evaluate("2 2", l));
         }
         public static int l(string s)
         {
