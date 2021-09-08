@@ -11,7 +11,7 @@ namespace EvalTester
 
             //Tests for Basic Addition
             Console.WriteLine("Answer should be 3 and was: " + Evaluator.Evaluate("1+2", l));
-            Console.WriteLine("Answer should be 6 and was: " + Evaluator.Evaluate("1+2+3", l));
+            Console.WriteLine("Answer should be 6 and was: " + Evaluator.Evaluate(" 1 + 2 + 3", l));
             Console.WriteLine("Answer should be 10 and was: " + Evaluate("1+2+3+4", l));
             Console.WriteLine("Answer should be 15 and was: " + Evaluate("1+2+3+4+5", l));
 
@@ -44,7 +44,8 @@ namespace EvalTester
             Console.WriteLine("answer should be 4 and was " + Evaluate("3 + 3 / bb3", l));
             Console.WriteLine("Answer should be 100 and was: " + Evaluate("100/(2/2)", l));
             Console.WriteLine("Answer should be 1 and was: " + Evaluate("(1+2) / 4 * 2", l));
-
+            Console.WriteLine("Result was: " + Evaluate("((a1+1)*2) + 4 / 2",l));
+            //Console.WriteLine("Result was: " + Evaluate("2 + 1  3 4", l));
             //Exception Test
             //Console.WriteLine(Evaluate("(1+2) /0", l));
             //Console.WriteLine("Exception should be thrown: " + Evaluate("==", l));

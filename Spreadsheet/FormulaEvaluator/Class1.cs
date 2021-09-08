@@ -80,7 +80,8 @@ namespace FormulaEvaluator
                         {
                             int x = (int) vals.Pop();
                             int y = (int)vals.Pop();
-                            vals.Push(Calculate(x, y, substrings[i]));
+                            vals.Push(Calculate(x, y, (string) operators.Pop()));
+                            operators.Push(substrings[i]);
                         }
                     }
                     else
@@ -111,7 +112,7 @@ namespace FormulaEvaluator
                             vals.Push(Calculate(x, y, (string)operators.Pop()));
                         }
                     }
-                    if (operators.Peek().Equals("("))
+                    if (operators.Count > 0 && operators.Peek().Equals("("))
                     {
                         operators.Pop();
                     }
@@ -171,7 +172,7 @@ namespace FormulaEvaluator
             else
             {
                 if (a == 0)
-                    throw new DivideByZeroException("Trying to divide by 0");
+                    throw new ArgumentException("Trying to divide by 0");
                 else
                     return b / a;
             }
@@ -185,25 +186,29 @@ namespace FormulaEvaluator
         /// <returns> returns true if </returns>
         private static bool IsVar(string s)
         {
-            if (s.Equals("") || s.Equals(" "))
+            if (s == "+" || s == "-" || s == "*" || s == "/" || s == "(" || s == ")")
+                return false;
+            else if (s.Equals("") || s.Equals(" "))
                 return false;
             else if (s.StartsWith(" "))
-                s = s.Remove(0,1);
+                s = s.Remove(0, 1);
             else if (s.EndsWith(" "))
-                s = s.Remove(s.Length-1);
+                s = s.Remove(s.Length - 1);
 
             if (Char.IsDigit(s[0]))
             {
-                throw new ArgumentException("Variable is formattted wrong");
+                throw new ArgumentException("Variable is formattted wrong or numbers are spaced incorrectly");
             }
+            if (s.Equals("") || s.Equals(" "))
+                return false;
             int i = 0;
-            while (Char.IsLetter(s[i]))
-                i++;
-            while (Char.IsDigit(s[i]))
+            while (i < s.Length && Char.IsLetter(s[i]))
             {
                 i++;
-                if (i == s.Length)
-                    break;
+            }
+            while (i < s.Length  && Char.IsDigit(s[i]))
+            {
+                i++;
             }
             if (i > 0 && Char.IsLetter(s[i - 1]) )
                 throw new ArgumentException("Letters cannot be bythemselves or after a digit");
