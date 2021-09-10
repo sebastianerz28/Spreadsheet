@@ -4,7 +4,7 @@ using static FormulaEvaluator.Evaluator;
 
 namespace EvalTester
 {
-    class Program
+    class EvalTester
     {
         static void Main(string[] args)
         {
