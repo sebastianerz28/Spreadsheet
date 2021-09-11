@@ -24,6 +24,51 @@ namespace DevelopmentTests
             Assert.AreEqual(0, t.Size);
         }
 
+        [TestMethod()]
+        public void TestHasDependentsEmpty()
+        {
+            DependencyGraph t = new DependencyGraph();
+            Assert.IsFalse(t.HasDependents("s"));
+        }
+
+        [TestMethod()]
+        public void TestHasDependents()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("s", "x");
+            Assert.IsTrue(t.HasDependents("s"));
+        }
+
+        [TestMethod()]
+        public void TestHasDependeesEmpty()
+        {
+            DependencyGraph t = new DependencyGraph();
+            Assert.IsFalse(t.HasDependees("s"));
+        }
+
+        [TestMethod()]
+        public void TestHasDependees()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("s", "x");
+            Assert.IsTrue(t.HasDependees("x"));
+        }
+
+        [TestMethod()]
+        public void TestBracket()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("s", "x");
+            Assert.AreEqual(1, t["x"]);
+        }
+        [TestMethod()]
+        public void TestBracketisEmpty()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("s", "x");
+            Assert.AreEqual(0, t["s"]);
+        }
+
 
         /// <summary>
         ///Empty graph should contain nothing
@@ -181,6 +226,34 @@ namespace DevelopmentTests
             Assert.IsFalse(e.MoveNext());
         }
 
+        [TestMethod()]
+        public void StressSmall()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("s", "x");
+            t.RemoveDependency("s", "x");
+            t.RemoveDependency("s", "x");
+            t.RemoveDependency("s", "x");
+            t.RemoveDependency("s", "x");
+            t.RemoveDependency("s", "x");
+            Assert.AreEqual(0, t.Size);
+        }
+
+        [TestMethod()]
+        public void testEmptyReplaceDependees()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.ReplaceDependees("s", new HashSet<string>() { "a", "c" });
+            Assert.AreEqual(2, t.Size);
+        }
+
+        [TestMethod()]
+        public void testEmptyReplaceDependents()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.ReplaceDependents("s", new HashSet<string>() { "a", "c" });
+            Assert.AreEqual(2, t.Size);
+        }
 
 
         /// <summary>

@@ -41,11 +41,17 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class DependencyGraph
     {
+        private Dictionary<string, HashSet<String>> dependents;
+        private Dictionary<string, HashSet<String>> dependees;
+        private int size;
         /// <summary>
         /// Creates an empty DependencyGraph.
         /// </summary>
         public DependencyGraph()
         {
+            dependees = new Dictionary<string, HashSet<string>>();
+            dependents = new Dictionary<string, HashSet<string>>();
+            size = 0;
         }
 
 
@@ -54,7 +60,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            
+            get {return size; }
         }
 
 
@@ -67,7 +74,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            get { return 0; }
+            get
+            {
+                if (HasDependees(s))
+                    return dependees[s].Count;
+                else
+                    return 0;
+            }
         }
 
 
@@ -76,7 +89,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
-            return false;
+            return dependents.ContainsKey(s);
         }
 
 
@@ -85,7 +98,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
-            return false;
+            return dependees.ContainsKey(s);
         }
 
 
@@ -94,7 +107,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+            if (dependents.ContainsKey(s))
+            {
+                return dependents[s].ToArray();
+            }
+
+            else
+                return new List<string>();
         }
 
         /// <summary>
@@ -102,7 +121,13 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            if (dependees.ContainsKey(s))
+            {
+                return dependees[s].ToArray();
+            }
+            else
+                return new List<string>(); 
+            
         }
 
 
@@ -118,6 +143,53 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
+            //Checks if s or t is not in the graph
+            if (!dependees.ContainsKey(t) && !dependents.ContainsKey(s))
+            {
+                HashSet<string> temp = new HashSet<string>();
+                temp.Add(t);
+                dependents.Add(s, temp);
+                HashSet<string> dependees_temp = new HashSet<string>();
+                dependees_temp.Add(s);
+                dependees.Add(t, dependees_temp);
+                size++;
+            }
+            //Checks to see if t has any dependees and s does not have any dependents
+            else if (dependees.ContainsKey(t) && !dependents.ContainsKey(s))
+            {
+                HashSet<string> temp = new HashSet<string>();
+                temp.Add(t);
+                dependents.Add(s, temp);
+                dependees[t].Add(s);
+                size++;
+            }
+            //Checks to see if t doesnt has any dependees and if s has any dependents
+            else if (!dependees.ContainsKey(t) && dependents.ContainsKey(s))
+            {
+                dependents[s].Add(t);
+                HashSet<string> temp = new HashSet<string>();
+                temp.Add(s);
+                dependees.Add(t, temp);
+                size++;
+                
+            }
+            //Else both t and s must be in the graph already
+            else
+            {
+                //If they are already a pair do nothing
+                if (dependents[s].Contains(t) && dependees[t].Contains(s))
+                {
+                    return;
+                }
+                //Else form a pair together
+                else
+                {
+                    dependents[s].Add(t);
+                    dependees[t].Add(s);
+                    size++;
+                }
+            }
+            
         }
 
 
@@ -128,6 +200,20 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
+            if (dependents.ContainsKey(s) && dependees.ContainsKey(t))
+            {
+                dependents[s].Remove(t);
+                dependees[t].Remove(s);
+                size--;
+                if (dependees[t].Count == 0)
+                    dependees.Remove(t);
+                if (dependents[s].Count == 0)
+                {
+                    dependents.Remove(s);
+                }
+            }
+
+            
         }
 
 
@@ -137,6 +223,28 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            if (dependents.ContainsKey(s))
+            {
+                foreach (string dependency in GetDependents(s))
+                {
+                    RemoveDependency(s,dependency);
+                }
+                foreach (string x in newDependents)
+                {
+                    AddDependency(s, x);
+                }
+            }
+            else
+            {
+                dependents.Add(s, new HashSet<string>());
+                foreach(string x in newDependents)
+                {
+                    AddDependency(s, x);
+                }
+            }
+                
+
+            
         }
 
 
@@ -146,6 +254,26 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
+            if (dependees.ContainsKey(s))
+            {
+                foreach (string dependency in GetDependees(s))
+                {
+                    RemoveDependency(dependency, s);
+                }
+                foreach (string x in newDependees)
+                {
+                    AddDependency(x, s);
+                }
+            }
+            else
+            {
+                dependees.Add(s, new HashSet<string>());
+                foreach(string x in newDependees)
+                {
+                    AddDependency(x, s);
+                }
+            }
+          
         }
 
     }
