@@ -8,7 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+//PS2
+//Sebastian Ramirez
+//9/10/21
 namespace SpreadsheetUtilities
 {
 
@@ -109,9 +111,9 @@ namespace SpreadsheetUtilities
         {
             if (dependents.ContainsKey(s))
             {
-                return dependents[s].ToArray();
+                return dependents[s].ToList();
             }
-
+            //If s has no dependents then returns an empty list
             else
                 return new List<string>();
         }
@@ -123,8 +125,9 @@ namespace SpreadsheetUtilities
         {
             if (dependees.ContainsKey(s))
             {
-                return dependees[s].ToArray();
+                return dependees[s].ToList();
             }
+            //If s has no dependees then it returns an empty list
             else
                 return new List<string>(); 
             
@@ -200,6 +203,7 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
+            //Only removes if the ordered pair exists
             if (dependents.ContainsKey(s) && dependees.ContainsKey(t))
             {
                 dependents[s].Remove(t);
@@ -223,6 +227,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            //If s already has dependents
             if (dependents.ContainsKey(s))
             {
                 foreach (string dependency in GetDependents(s))
@@ -234,6 +239,7 @@ namespace SpreadsheetUtilities
                     AddDependency(s, x);
                 }
             }
+            //If s does not have dependents
             else
             {
                 dependents.Add(s, new HashSet<string>());
@@ -254,17 +260,21 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
+            //If s already has dependees
             if (dependees.ContainsKey(s))
             {
+                //Removes old dependees to clear for the new ones and to update the size of the graph
                 foreach (string dependency in GetDependees(s))
                 {
                     RemoveDependency(dependency, s);
                 }
+                //Adds new dependees
                 foreach (string x in newDependees)
                 {
                     AddDependency(x, s);
                 }
             }
+            //If s doesn't have any dependees
             else
             {
                 dependees.Add(s, new HashSet<string>());
