@@ -90,39 +90,8 @@ namespace SpreadsheetUtilities
             normalizedVars = new List<String>();
             if (tokens.Count() == 0)
                 throw new FormulaFormatException("Empty formula");
-
             FirstAndLastValid(tokens.First(), tokens.Last());
             ReadTokens(tokens, normalize, isValid);
-            
-            /*
-             * 
-                Parsing
-
-                    We have provided a private method that will convert an input string into tokens. After tokenizing, your code should verify that the only tokens are (, ), +, -, *, /, variables, and decimal real numbers (including scientific notation).
-                One Token Rule
-
-                    There must be at least one token.
-                Right Parentheses Rule
-
-                    When reading tokens from left to right, at no point should the number of closing parentheses seen so far be greater 
-                    than the number of opening parentheses seen so far.
-                Balanced Parentheses Rule
-
-                    The total number of opening parentheses must equal the total number of closing parentheses.
-                Starting Token Rule
-
-                    The first token of an expression must be a number, a variable, or an opening parenthesis.
-                Ending Token Rule
-
-                    The last token of an expression must be a number, a variable, or a closing parenthesis.
-                Parenthesis/Operator Following Rule
-
-                    Any token that immediately follows an opening parenthesis or an operator must be either a number, a variable, or an opening parenthesis.
-                 Extra Following Rule
-
-                 Any token that immediately follows a number, a variable, or a closing parenthesis must be either an operator or a closing parenthesis.
-            */
-
         }
 
         /// <summary>
@@ -233,13 +202,10 @@ namespace SpreadsheetUtilities
                     return vals.Pop();
             else
             {
-                
                     double x = vals.Pop();
                     double y = vals.Pop();
                     return Calculate(x, y, operators.Pop());
             }
-
-
         }
 
         /// <summary>
