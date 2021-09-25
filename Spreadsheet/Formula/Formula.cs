@@ -136,6 +136,13 @@ namespace SpreadsheetUtilities
                 }
                 else if (IsVar(s))
                 {
+                    try
+                    {
+                        lookup(s);
+                    } catch 
+                    {
+                        return new FormulaError("S could not be found");
+                    }
                     if (vals.Count == 0)
                     {
                         vals.Push(lookup(s));
@@ -190,7 +197,7 @@ namespace SpreadsheetUtilities
                     {
                         double x = vals.Pop();
                         double y = vals.Pop();
-                        if (y == 0 && operators.Peek().Equals("/"))
+                        if (x == 0 && operators.Peek().Equals("/"))
                             return new FormulaError("Divide by 0");
                         vals.Push(Calculate(x, y, operators.Pop()));
                     }
@@ -207,6 +214,7 @@ namespace SpreadsheetUtilities
                     return Calculate(x, y, operators.Pop());
             }
         }
+
 
         /// <summary>
         /// Enumerates the normalized versions of all of the variables that occur in this 
@@ -273,6 +281,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator ==(Formula f1, Formula f2)
         {
+            if (f1 is null || !(f1 is Formula))
+                return false;
             return f1.Equals(f2);
         }
 
@@ -345,7 +355,14 @@ namespace SpreadsheetUtilities
             StringBuilder builder = new StringBuilder();
             foreach(string s in tokens)
             {
-                if (IsVar(s))
+                 if (IsNumber(s))
+                 {
+                    
+                    normalizedFormula.Add(double.Parse(s).ToString());
+
+                    builder.Append(double.Parse(s).ToString());
+                 }
+                else if (IsVar(s))
                 {
                     string normalized = normalize(s);
                     if (isValid(normalized))
@@ -356,7 +373,7 @@ namespace SpreadsheetUtilities
                             normalizedVars.Add(normalized);
                             vars.Add(normalized);
                         }
-                        builder.Append(s);
+                        builder.Append(normalized);
                     }
                     else
                         throw new FormulaFormatException("Variable: " + s + " is not valid");
@@ -373,11 +390,6 @@ namespace SpreadsheetUtilities
                     builder.Append(s);
                 }
                 
-                else if (IsNumber(s))
-                {
-                    normalizedFormula.Add(s);
-                    builder.Append(s);
-                }
                 else if (IsOperator(s))
                 {
                     normalizedFormula.Add(s);
@@ -396,12 +408,15 @@ namespace SpreadsheetUtilities
         }
         private void FollowingRules(string curr, string prev)
         {
-            if (isLP(prev) || IsOperator(prev))
-                if (!isLP(curr) && !IsNumber(curr) && !IsVar(curr))
-                    throw new FormulaFormatException("Any token that immediately follows an opening parenthesis or an operator must be either a number, a variable, or an opening parenthesis.");
             if (IsRp(prev) || IsNumber(prev) || IsVar(prev))
                 if (!IsRp(curr) && !IsOperator(curr))
                     throw new FormulaFormatException("Any token that immediately follows a number, a variable, or a closing parenthesis must be either an operator or a closing parenthesis.");
+                else
+                    return;
+            else if (isLP(prev) || IsOperator(prev))
+                if (!isLP(curr) && !IsNumber(curr) && !IsVar(curr))
+                    throw new FormulaFormatException("Any token that immediately follows an opening parenthesis or an operator must be either a number, a variable, or an opening parenthesis.");
+            
             
         }
 

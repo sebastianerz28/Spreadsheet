@@ -111,11 +111,11 @@ namespace SpreadsheetUtilities
         {
             if (dependents.ContainsKey(s))
             {
-                return dependents[s].ToList();
+                return dependents[s];
             }
             //If s has no dependents then returns an empty list
             else
-                return new List<string>();
+                return new HashSet<string>();
         }
 
         /// <summary>
@@ -125,11 +125,11 @@ namespace SpreadsheetUtilities
         {
             if (dependees.ContainsKey(s))
             {
-                return dependees[s].ToList();
+                return dependees[s];
             }
             //If s has no dependees then it returns an empty list
             else
-                return new List<string>(); 
+                return new HashSet<string>(); 
             
         }
 
