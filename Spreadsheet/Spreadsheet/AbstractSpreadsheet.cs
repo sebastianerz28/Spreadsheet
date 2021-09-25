@@ -185,8 +185,8 @@ namespace SS
         /// 
         /// This method starts by adding the name passed through to visited. It next loops through all the dependents
         /// of the name passed through. If the the current depedent is equal to the start then it throws a new circular exception
-        /// and if that is 
-        /// 
+        /// and if it isnt equal it checks if visited contains n and if that is false it calls visit again passing in n as the new name
+        /// once the loop is done it adds name to changed in the first position
         ///   -- You should fully comment what is going on below --
         /// </summary>
         private void Visit(string start, string name, ISet<string> visited, LinkedList<string> changed)
