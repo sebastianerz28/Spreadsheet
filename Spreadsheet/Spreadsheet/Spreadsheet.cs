@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace  SS
 {
-    class Spreadsheet : AbstractSpreadsheet
+    public class Spreadsheet : AbstractSpreadsheet
     {
         private DependencyGraph dependencies;
         private Dictionary<string, Cell> cells;
@@ -24,28 +24,27 @@ namespace  SS
         /// </summary>
         public override object GetCellContents(string name)
         {
-            if (name == null || IsInvalid(name))
+            if (name == null || !(IsVar(name)))
                 throw new InvalidNameException();   
             else
                 
             {
-                if (cells.TryGetValue(name, out Cell c))
+                cells.TryGetValue(name, out Cell c);
+                
+                if(!(c.formula is null))
                 {
-                    if(c.formula != null)
-                    {
-                        return c.formula;
-                    }
-                    else if(c.var != null)
-                    {
-                        return c.var;
-                    }
-                    else
-                    {
-                        return c.val;
-                    }
+                     return c.formula;
+                }
+                else if(!(c.var is null))
+                {
+                    return c.var;
                 }
                 else
-                    throw new InvalidNameException();
+                {
+                    return c.val;
+                }
+                
+               
             }
                 
         }
@@ -69,16 +68,18 @@ namespace  SS
         /// </summary>
         public override IList<string> SetCellContents(string name, double number)
         {
-            if (name == null || IsInvalid(name))
+            if (name == null || !(IsVar(name)))
                 throw new InvalidNameException();
             else
             {
                 if(cells.TryGetValue(name, out Cell val))
                 {
-                    val = new Cell(number);
+                    val.Change(number);
+                    dependencies.ReplaceDependees(name, new HashSet<string>());
                 }
                 else
                 {
+                    dependencies.ReplaceDependees(name, new HashSet<string>());
                     cells.Add(name, new Cell(number));
                 }
             }
@@ -98,11 +99,11 @@ namespace  SS
         /// </summary>
         public override IList<string> SetCellContents(string name, string text)
         {
-            if (name == null || IsInvalid(name))
+            if (name == null || !(IsVar(name)))
             {
                 throw new InvalidNameException();
             }
-            if(text == null)
+            else if(text == null)
             {
                 throw new ArgumentNullException();
             }
@@ -111,11 +112,13 @@ namespace  SS
 
                 if (cells.TryGetValue(name, out Cell val))
                 {
-                    val = new Cell(text);
+
+                    val.Change(text);
+                    dependencies.ReplaceDependees(name, new HashSet<string>());
                 }
                 else
                 {
-                    dependencies.AddDependency(name, null);
+                    dependencies.ReplaceDependees(name, new HashSet<string>());
                     cells.Add(name, new Cell(text));
                 }
             }
@@ -138,25 +141,30 @@ namespace  SS
         /// </summary>
         public override IList<string> SetCellContents(string name, Formula formula)
         {
-            if (name == null || IsInvalid(name))
+            if (name == null || !(IsVar(name)))
+            {
                 throw new InvalidNameException();
-            if (formula == null)
+            }
+            else if (formula == null)
+            {
                 throw new ArgumentNullException();
-           
+            }
+            else 
             {
                 if (cells.TryGetValue(name, out Cell val))
                 {
                     GetCellsToRecalculate(name);
-                    val = new Cell(formula);
-                    dependencies.ReplaceDependents(name, new HashSet<string>());
+                    val.Change(formula);
+                    dependencies.ReplaceDependees(name, formula.GetVariables());
                 }
                 else
                 {
                     GetCellsToRecalculate(name);
                     cells.Add(name, new Cell(formula));
-                    dependencies.ReplaceDependents(name, new HashSet<string>(GetCellsToRecalculate(name)));
+                    dependencies.ReplaceDependees(name, formula.GetVariables());
                 }
             }
+
             return new List<string>(GetCellsToRecalculate(name));
         }
         /// <summary>
@@ -178,13 +186,13 @@ namespace  SS
             return dependencies.GetDependents(name);
         }
 
-        private bool IsInvalid(string name)
+        private bool IsVar(string token)
         {
-            String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
-            if (Regex.IsMatch(name, varPattern))
-                return false;
-            else
+            String varPattern = @"^[a-zA-Z_](?: [a-zA-Z_]|\d)*";
+            if (Regex.IsMatch(token, varPattern))
                 return true;
+            else
+                return false;
         }
 
         private class Cell
@@ -208,6 +216,26 @@ namespace  SS
 
             }
             
+            public void Change(double d)
+            {
+                var = null;
+                formula = null;
+                val = d;
+            }
+            public void Change(Formula f)
+            {
+                formula = f;
+                var = null;
+                val = double.NaN;
+            
+            }
+            public void Change(string s)
+            {
+                formula = null;
+                var = s;
+                val = double.NaN;
+            }
+
         }
     }
     /// <summary>

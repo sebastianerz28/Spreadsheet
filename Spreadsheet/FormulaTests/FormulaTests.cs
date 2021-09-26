@@ -152,7 +152,7 @@ namespace FormulaObjectTester
 
         {
 
-            Assert.IsTrue(new Formula("X+Y") == new Formula("X + Y"));
+            Assert.IsTrue(new Formula("X+Y") == new Formula("X+Y"));
 
         }
 
@@ -704,7 +704,12 @@ namespace FormulaObjectTester
 
         }
 
-
+        [TestMethod]
+        public void TestNullEquals()
+        {
+            Formula f = null;
+            Assert.IsTrue(f == null);
+        }
 
     }
 

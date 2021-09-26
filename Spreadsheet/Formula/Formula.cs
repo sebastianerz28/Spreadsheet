@@ -269,9 +269,11 @@ namespace SpreadsheetUtilities
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (!(obj is Formula) )
+            
+            if (ReferenceEquals(obj, null) || (obj.GetType() != this.GetType()))
                 return false;
-            return obj.ToString().Equals(this.stringForm);
+            else
+                return obj.ToString().Equals(this.stringForm);
         }
 
         /// <summary>
@@ -281,9 +283,12 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator ==(Formula f1, Formula f2)
         {
-            if (f1 is null || !(f1 is Formula))
+            if (ReferenceEquals(f1, null) && ReferenceEquals(f2, null))
+                return true;
+            else if (ReferenceEquals(f1, null) && !ReferenceEquals(f2, null))
                 return false;
-            return f1.Equals(f2);
+            else
+                return f1.Equals(f2);
         }
 
         /// <summary>
