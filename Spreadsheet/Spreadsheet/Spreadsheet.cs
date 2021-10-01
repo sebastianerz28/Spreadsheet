@@ -12,11 +12,32 @@ namespace  SS
     {
         private DependencyGraph dependencies;
         private Dictionary<string, Cell> cells;
-        public Spreadsheet()
+        private bool changed;
+        public Spreadsheet() : base(s => true, s=>s, "base")
+        {
+            dependencies = new DependencyGraph();
+            cells = new Dictionary<string, Cell>();
+            changed = false;
+        }
+
+        public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
         {
             dependencies = new DependencyGraph();
             cells = new Dictionary<string, Cell>();
         }
+
+        // ADDED FOR PS5
+        /// <summary>
+        /// True if this spreadsheet has been modified since it was created or saved                  
+        /// (whichever happened most recently); false otherwise.
+        /// </summary>
+        public override bool Changed 
+        { get => changed; 
+          protected set =>  changed = value; 
+        }
+
+
+
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
         /// 
@@ -49,6 +70,24 @@ namespace  SS
             }
                 
         }
+        // ADDED FOR PS5
+        /// <summary>
+        /// If name is null or invalid, throws an InvalidNameException.
+        /// 
+        /// Otherwise, returns the value (as opposed to the contents) of the named cell.  The return
+        /// value should be either a string, a double, or a SpreadsheetUtilities.FormulaError.
+        /// </summary>
+        public override object GetCellValue(string name)
+        {
+            if(!IsValid(name) || name == null)
+            {
+                throw new InvalidNameException();
+            }
+            else
+            {
+                GetCellContents()
+            }
+        }
 
         /// <summary>
         /// Enumerates  the names of all the non-empty cells in the spreadsheet.
@@ -57,6 +96,42 @@ namespace  SS
         {
             return cells.Keys;
         }
+        // ADDED FOR PS5
+        /// <summary>
+        /// Returns the version information of the spreadsheet saved in the named file.
+        /// If there are any problems opening, reading, or closing the file, the method
+        /// should throw a SpreadsheetReadWriteException with an explanatory message.
+        /// </summary>
+        public override string GetSavedVersion(string filename)
+        {
+            throw new NotImplementedException();
+        }
+        // ADDED FOR PS5
+        /// <summary>
+        /// Writes the contents of this spreadsheet to the named file using an XML format.
+        /// The XML elements should be structured as follows:
+        /// 
+        /// <spreadsheet version="version information goes here">
+        /// 
+        /// <cell>
+        /// <name>cell name goes here</name>
+        /// <contents>cell contents goes here</contents>    
+        /// </cell>
+        /// 
+        /// </spreadsheet>
+        /// 
+        /// There should be one cell element for each non-empty cell in the spreadsheet.  
+        /// If the cell contains a string, it should be written as the contents.  
+        /// If the cell contains a double d, d.ToString() should be written as the contents.  
+        /// If the cell contains a Formula f, f.ToString() with "=" prepended should be written as the contents.
+        /// 
+        /// If there are any problems opening, writing, or closing the file, the method should throw a
+        /// SpreadsheetReadWriteException with an explanatory message.
+        public override void Save(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
         /// 
@@ -67,7 +142,7 @@ namespace  SS
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
         /// list {A1, B1, C1} is returned.
         /// </summary>
-        public override IList<string> SetCellContents(string name, double number)
+        protected override IList<string> SetCellContents(string name, double number)
         {
             if (name == null || !(IsVar(name)))
                 throw new InvalidNameException();
@@ -98,7 +173,7 @@ namespace  SS
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
         /// list {A1, B1, C1} is returned.
         /// </summary>
-        public override IList<string> SetCellContents(string name, string text)
+        protected override IList<string> SetCellContents(string name, string text)
         {
             if (name == null || !(IsVar(name)))
             {
@@ -140,7 +215,7 @@ namespace  SS
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
         /// list {A1, B1, C1} is returned.
         /// </summary>
-        public override IList<string> SetCellContents(string name, Formula formula)
+        protected override IList<string> SetCellContents(string name, Formula formula)
         {
             if (name == null || !(IsVar(name)))
             {
@@ -168,6 +243,12 @@ namespace  SS
 
             return new List<string>(GetCellsToRecalculate(name));
         }
+
+        public override IList<string> SetContentsOfCell(string name, string content)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Returns an enumeration, without duplicates, of the names of all cells whose
         /// values depend directly on the value of the named cell.  In other words, returns
@@ -205,6 +286,21 @@ namespace  SS
             {
                 var = contents;
 
+            }
+            public object GetContents()
+            {
+                if(var != null)
+                {
+                    return var;
+                }
+                else if (formula != null)
+                {
+                    return formula;
+                }
+                else
+                {
+                    return val;
+                }
             }
             public Cell(double contents)
             {
