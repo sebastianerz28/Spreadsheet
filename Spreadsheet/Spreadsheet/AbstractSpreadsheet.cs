@@ -162,7 +162,7 @@ namespace SS
         /// C1 contains the formula A1 + B1
         /// D1 contains the formula A1 * 7
         /// E1 contains 15
-        /// 
+        ///     
         /// If A1 has changed, then A1, B1, C1, and D1 must be recalculated,
         /// and they must be recalculated in an order which has A1 first, and B1 before C1
         /// (there are multiple such valid orders).
