@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace  SS
+namespace SS
 {
     public class Spreadsheet : AbstractSpreadsheet
     {
@@ -25,28 +25,33 @@ namespace  SS
         public override object GetCellContents(string name)
         {
             if (name == null || !(IsVar(name)))
-                throw new InvalidNameException();   
+                throw new InvalidNameException();
             else
-                
+
             {
-                cells.TryGetValue(name, out Cell c);
-                
-                if(!(c.formula is null))
+                if (cells.TryGetValue(name, out Cell c))
                 {
-                     return c.formula;
-                }
-                else if(!(c.var is null))
-                {
-                    return c.var;
+
+                    if (!(c.formula is null))
+                    {
+                        return c.formula;
+                    }
+                    else if (!(c.var is null))
+                    {
+                        return c.var;
+                    }
+                    else
+                    {
+                        return c.val;
+                    }
+
                 }
                 else
                 {
-                    return c.val;
+                    return "";
                 }
-                
-               
             }
-                
+
         }
 
         /// <summary>
@@ -72,7 +77,7 @@ namespace  SS
                 throw new InvalidNameException();
             else
             {
-                if(cells.TryGetValue(name, out Cell val))
+                if (cells.TryGetValue(name, out Cell val))
                 {
                     val.Change(number);
                     dependencies.ReplaceDependees(name, new HashSet<string>());
@@ -103,7 +108,7 @@ namespace  SS
             {
                 throw new InvalidNameException();
             }
-            else if(text == null)
+            else if (text == null)
             {
                 throw new ArgumentNullException();
             }
@@ -112,14 +117,29 @@ namespace  SS
 
                 if (cells.TryGetValue(name, out Cell val))
                 {
-
-                    val.Change(text);
-                    dependencies.ReplaceDependees(name, new HashSet<string>());
+                    if (text == "")
+                    {
+                        cells.Remove(name);
+                        dependencies.ReplaceDependees(name, new HashSet<string>());
+                    }
+                    else
+                    {
+                        val.Change(text);
+                        dependencies.ReplaceDependees(name, new HashSet<string>());
+                    }
                 }
                 else
                 {
-                    dependencies.ReplaceDependees(name, new HashSet<string>());
-                    cells.Add(name, new Cell(text));
+                    if (text == "")
+                    {
+                        cells.Remove(name);
+                        dependencies.ReplaceDependees(name, new HashSet<string>());
+                    }
+                    else
+                    {
+                        dependencies.ReplaceDependees(name, new HashSet<string>());
+                        cells.Add(name, new Cell(text));
+                    }
                 }
             }
             return new List<string>(GetCellsToRecalculate(name));
@@ -149,22 +169,41 @@ namespace  SS
             {
                 throw new ArgumentNullException();
             }
-            else 
+            else
             {
+                IEnumerable<string> old = dependencies.GetDependees(name);
                 if (cells.TryGetValue(name, out Cell val))
                 {
-                    GetCellsToRecalculate(name);
-                    val.Change(formula);
-                    dependencies.ReplaceDependees(name, formula.GetVariables());
+                    try
+                    {
+                        GetCellsToRecalculate(name);
+                        dependencies.ReplaceDependees(name, formula.GetVariables());
+                        GetCellsToRecalculate(name);
+                        val.Change(formula);
+                    }
+                    catch (CircularException e)
+                    {
+                        dependencies.ReplaceDependees(name, old);
+                        throw e;
+                    }
                 }
                 else
                 {
-                    GetCellsToRecalculate(name);
-                    cells.Add(name, new Cell(formula));
-                    dependencies.ReplaceDependees(name, formula.GetVariables());
+                    try
+                    {
+                        GetCellsToRecalculate(name);
+                        dependencies.ReplaceDependees(name, formula.GetVariables());
+                        GetCellsToRecalculate(name);
+                        cells.Add(name, new Cell(formula));
+                    }
+                    catch (CircularException e)
+                    {
+                        dependencies.ReplaceDependees(name, old);
+                        throw e;
+                    }
+
                 }
             }
-
             return new List<string>(GetCellsToRecalculate(name));
         }
         /// <summary>
@@ -182,7 +221,7 @@ namespace  SS
         /// </summary>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
-            
+
             return dependencies.GetDependents(name);
         }
 
@@ -215,7 +254,7 @@ namespace  SS
                 formula = contents;
 
             }
-            
+
             public void Change(double d)
             {
                 var = null;
@@ -227,7 +266,7 @@ namespace  SS
                 formula = f;
                 var = null;
                 val = double.NaN;
-            
+
             }
             public void Change(string s)
             {
@@ -241,6 +280,6 @@ namespace  SS
     /// <summary>
     /// 
     /// </summary>
-    
+
 }
 
