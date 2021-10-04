@@ -15,6 +15,7 @@ namespace SS
         private Dictionary<string, Cell> cells;
         private Dictionary<string, double> evaluatedCells;
         private bool changed;
+
         public Spreadsheet() : base(s => true, s => s, "default")
         {
             dependencies = new DependencyGraph();
@@ -22,14 +23,62 @@ namespace SS
             changed = false;
             evaluatedCells = new Dictionary<string, double>();
         }
-
-        public Spreadsheet(string filepath, Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
+        public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
         {
             evaluatedCells = new Dictionary<string, double>();
             dependencies = new DependencyGraph();
             cells = new Dictionary<string, Cell>();
             changed = false;
 
+
+        }
+        public Spreadsheet(string filepath, Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
+        {
+            evaluatedCells = new Dictionary<string, double>();
+            dependencies = new DependencyGraph();
+            cells = new Dictionary<string, Cell>();
+            changed = false;
+            BuildSpreadsheet(filepath);
+
+        }
+        /// <summary>
+        /// Takes in a file and builds spreadsheet from file
+        /// </summary>
+        /// <param name="filepath"></param>
+        private void BuildSpreadsheet(string filepath)
+        {
+            try
+            {
+                string name = null;
+                string contents = null;
+                XmlReader xmlReader = XmlReader.Create(filepath);
+                while (xmlReader.Read())
+                {
+                    if(xmlReader.IsStartElement())
+                    {
+                        
+                        if (xmlReader.Name == "name")
+                        {
+                            xmlReader.Read();
+                            name = xmlReader.Value;
+                        }
+                        
+                        else if (xmlReader.Name == "contents")
+                        {
+                            xmlReader.Read();
+                            contents = xmlReader.Value;
+                            SetContentsOfCell(name, contents);
+                        }
+                        
+                    }
+                    
+
+                }
+            }
+            catch
+            {
+                throw new SpreadsheetReadWriteException("Spreadsheet could not be built");
+            }
         }
 
         // ADDED FOR PS5
@@ -45,7 +94,7 @@ namespace SS
 
 
 
-        
+
         // ADDED FOR PS5
         /// <summary>
         /// Returns the version information of the spreadsheet saved in the named file.
@@ -54,7 +103,34 @@ namespace SS
         /// </summary>
         public override string GetSavedVersion(string filename)
         {
-            throw new NotImplementedException();
+            string v = "";
+            bool foundSpreadSheet = false;
+            try
+            {
+                XmlReader xmlReader = XmlReader.Create(filename);
+                while (xmlReader.Read())
+                {
+                    if (xmlReader.Name == "spreadsheet")
+                    {
+
+
+                        v = xmlReader["version"];
+                        foundSpreadSheet = true;
+                        break;
+                    }
+                }
+                if (foundSpreadSheet == false)
+                    throw new SpreadsheetReadWriteException("Version Not Found");
+            }
+            catch (Exception e)
+            {
+                throw new SpreadsheetReadWriteException(e.ToString());
+            }
+            if(v == null)
+            {
+                throw new SpreadsheetReadWriteException("version not found");
+            }
+            return v;
         }
         // ADDED FOR PS5
         /// <summary>
@@ -81,28 +157,30 @@ namespace SS
         {
             try
             {
-                XmlWriter writer = XmlWriter.Create(filename);
-                writer.WriteStartDocument();
-                writer.WriteStartElement("spreadsheet");
-                writer.WriteAttributeString("Version", Version);
-                foreach(string s in cells.Keys)
+                XmlWriterSettings writerSettings = new XmlWriterSettings();
+                writerSettings.Indent = true;
+                XmlWriter xmlWriter = XmlWriter.Create(filename, writerSettings);
+                xmlWriter.WriteStartDocument();
+                xmlWriter.WriteStartElement("spreadsheet");
+                xmlWriter.WriteAttributeString("version", Version);
+                foreach (string s in cells.Keys)
                 {
-                    writer.WriteStartElement("cell");
-                    writer.WriteElementString("name", s);
-                    if(cells[s].GetContents() is Formula)
+                    xmlWriter.WriteStartElement("cell");
+                    xmlWriter.WriteElementString("name", s);
+                    if (cells[s].GetContents() is Formula)
                     {
                         string eql = "=" + cells[s].GetContents().ToString();
-                        writer.WriteElementString("contents", eql);
+                        xmlWriter.WriteElementString("contents", eql);
                     }
                     else
                     {
-                        writer.WriteElementString("contents", cells[s].ToString());
+                        xmlWriter.WriteElementString("contents", cells[s].GetContents().ToString());
                     }
-                    writer.WriteEndElement();
+                    xmlWriter.WriteEndElement();
                 }
-                writer.WriteEndElement();
-                writer.Dispose();
-               
+                xmlWriter.WriteEndElement();
+                xmlWriter.Dispose();
+
             }
             catch
             {
@@ -118,19 +196,21 @@ namespace SS
         /// </summary>
         public override object GetCellContents(string name)
         {
-            if (name == null || !(IsVar(name)))
+            
+            if (name == null || !(IsValid(Normalize(name))) || !IsVar(name))
                 throw new InvalidNameException();
             else
             {
+                name = Normalize(name);
                 if (cells.TryGetValue(name, out Cell c))
                 {
                     if (!(c.formula is null))
                     {
                         return c.formula;
                     }
-                    else if (!(c.var is null))
+                    else if (!(c.text is null))
                     {
-                        return c.var;
+                        return c.text;
                     }
                     else
                     {
@@ -159,15 +239,24 @@ namespace SS
         /// </summary>
         public override object GetCellValue(string name)
         {
-            if (!IsValid(name) || name == null)
+            
+            if (name == null || (!IsValid(name) || !IsVar(name)))
             {
                 throw new InvalidNameException();
             }
+            
             else
             {
-                Formula f = new Formula(GetCellContents(name).ToString(), Normalize, IsValid);
-                object o = f.Evaluate(lookup);
-                return o;
+                name = Normalize(name);
+                if (cells.TryGetValue(name, out Cell c))
+                {
+                    return c.Evaluated;
+                }
+                else
+                {
+                    return "";
+                }
+
             }
         }
         // ADDED FOR PS5
@@ -205,26 +294,61 @@ namespace SS
         /// </summary>
         public override IList<string> SetContentsOfCell(string name, string content)
         {
-            if(content == null)
+            //Normalize Name
+            
+            if (content == null)
             {
                 throw new ArgumentNullException("Content is null");
-                
+
             }
-            if(name == null || !IsValid(Normalize(name)))
+            if (name == null || !IsValid(Normalize(name)) || !IsVar(name))
             {
                 throw new InvalidNameException();
             }
-            if(double.TryParse(content, out double result))
+            name = Normalize(name);
+            IList<string> list;
+            if (double.TryParse(content, out double result))
             {
-                return SetCellContents(Normalize(name), result);
-                
+                list = SetCellContents(Normalize(name), result);
+
             }
-            else if (content[0] == '=')
+            else if (content.Length > 0 && content[0] == '=')
             {
-                
+                Formula f = new Formula(content.Trim('='));
+                list = SetCellContents(name, f);
+
             }
-            throw new NotImplementedException();
+            else
+            {
+                list = SetCellContents(name, content);
+
+            }
+            //Will Recalculate Any Cells that have a some form of dependency on name
+
+            Recalculate(list);
+            changed = true;
+            return list;
+
         }
+        /// <summary>
+        /// Method to recalculate any cells that are a formula that were returned in SetContentsOfCell
+        /// </summary>
+        /// <param name="list">list of cells to be recalculated</param>
+        private void Recalculate(IList<string> list)
+        {
+            foreach (string s in list)
+            {
+                if (cells.TryGetValue(s, out Cell c))
+                {
+                    if (c.formula != null)
+                    {
+                        object o = c.formula.Evaluate(lookup);
+                        c.Evaluated = o;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
         /// 
@@ -237,21 +361,22 @@ namespace SS
         /// </summary>
         protected override IList<string> SetCellContents(string name, double number)
         {
-            if (name == null || !(IsVar(name)) || !IsValid(name))
-                throw new InvalidNameException();
+
+            if (cells.TryGetValue(name, out Cell val))
+            {
+                val.Change(number);
+                val.Evaluated = number;
+                dependencies.ReplaceDependees(name, new HashSet<string>());
+            }
             else
             {
-                if (cells.TryGetValue(name, out Cell val))
-                {
-                    val.Change(number);
-                    dependencies.ReplaceDependees(name, new HashSet<string>());
-                }
-                else
-                {
-                    dependencies.ReplaceDependees(name, new HashSet<string>());
-                    cells.Add(name, new Cell(number));
-                }
+                dependencies.ReplaceDependees(name, new HashSet<string>());
+                Cell c = new Cell(number);
+                c.Evaluated = number;
+                cells.Add(name, c);
+
             }
+
             return new List<string>(GetCellsToRecalculate(name));
         }
         /// <summary>
@@ -268,43 +393,40 @@ namespace SS
         /// </summary>
         protected override IList<string> SetCellContents(string name, string text)
         {
-            if (name == null || !(IsVar(name)))
+
+
+            if (cells.TryGetValue(name, out Cell val))
             {
-                throw new InvalidNameException();
-            }
-            else if (text == null)
-            {
-                throw new ArgumentNullException();
-            }
-            else
-            {
-                if (cells.TryGetValue(name, out Cell val))
+                if (text == "")
                 {
-                    if (text == "")
-                    {
-                        cells.Remove(name);
-                        dependencies.ReplaceDependees(name, new HashSet<string>());
-                    }
-                    else
-                    {
-                        val.Change(text);
-                        dependencies.ReplaceDependees(name, new HashSet<string>());
-                    }
+                    cells.Remove(name);
+                    val.Evaluated = text;
+                    dependencies.ReplaceDependees(name, new HashSet<string>());
                 }
                 else
                 {
-                    if (text == "")
-                    {
-                        cells.Remove(name);
-                        dependencies.ReplaceDependees(name, new HashSet<string>());
-                    }
-                    else
-                    {
-                        dependencies.ReplaceDependees(name, new HashSet<string>());
-                        cells.Add(name, new Cell(text));
-                    }
+                    val.Change(text);
+                    val.Evaluated = text;
+                    dependencies.ReplaceDependees(name, new HashSet<string>());
                 }
             }
+            else
+            {
+                if (text == "")
+                {
+                    cells.Remove(name);
+
+                    dependencies.ReplaceDependees(name, new HashSet<string>());
+                }
+                else
+                {
+                    Cell c = new Cell(text);
+                    c.Evaluated = text;
+                    dependencies.ReplaceDependees(name, new HashSet<string>());
+                    cells.Add(name, c);
+                }
+            }
+
             return new List<string>(GetCellsToRecalculate(name));
         }
         /// <summary>
@@ -324,52 +446,43 @@ namespace SS
         /// </summary>
         protected override IList<string> SetCellContents(string name, Formula formula)
         {
-            if (name == null || !(IsVar(name)))
+
+            IEnumerable<string> old = dependencies.GetDependees(name);
+            if (cells.TryGetValue(name, out Cell val))
             {
-                throw new InvalidNameException();
-            }
-            else if (formula == null)
-            {
-                throw new ArgumentNullException();
+                try
+                {
+                    GetCellsToRecalculate(name);
+                    dependencies.ReplaceDependees(name, formula.GetVariables());
+                    GetCellsToRecalculate(name);
+                    val.Change(formula);
+                }
+                catch (CircularException e)
+                {
+                    dependencies.ReplaceDependees(name, old);
+                    throw e;
+                }
             }
             else
             {
-                IEnumerable<string> old = dependencies.GetDependees(name);
-                if (cells.TryGetValue(name, out Cell val))
+                try
                 {
-                    try
-                    {
-                        GetCellsToRecalculate(name);
-                        dependencies.ReplaceDependees(name, formula.GetVariables());
-                        GetCellsToRecalculate(name);
-                        val.Change(formula);
-                    }
-                    catch (CircularException e)
-                    {
-                        dependencies.ReplaceDependees(name, old);
-                        throw e;
-                    }
+                    GetCellsToRecalculate(name);
+                    dependencies.ReplaceDependees(name, formula.GetVariables());
+                    GetCellsToRecalculate(name);
+                    cells.Add(name, new Cell(formula));
                 }
-                else
+                catch (CircularException e)
                 {
-                    try
-                    {
-                        GetCellsToRecalculate(name);
-                        dependencies.ReplaceDependees(name, formula.GetVariables());
-                        GetCellsToRecalculate(name);
-                        cells.Add(name, new Cell(formula));
-                    }
-                    catch (CircularException e)
-                    {
-                        dependencies.ReplaceDependees(name, old);
-                        throw e;
-                    }
+                    dependencies.ReplaceDependees(name, old);
+                    throw e;
                 }
             }
+
             return new List<string>(GetCellsToRecalculate(name));
         }
 
-       
+
 
         /// <summary>
         /// Returns an enumeration, without duplicates, of the names of all cells whose
@@ -390,11 +503,28 @@ namespace SS
             return dependencies.GetDependents(name);
         }
 
+        /// <summary>
+        /// returns the double from an evaluated cell
+        /// </summary>
+        /// <param name="cell">cell to get value from</param>
+        /// <returns>Throws exception if evaluated is not a double, returns the double otherwise</returns>
         private double lookup(string cell)
         {
-            string s = Normalize(cell);
-            double o = evaluatedCells[s];
-            return o;
+            if (cells.TryGetValue(cell, out Cell c))
+            {
+                if (c.Evaluated is double)
+                {
+                    return (double)c.Evaluated;
+                }
+                else
+                {
+                    throw new ArgumentException("Evaluated is not double");
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Cell Doesn't exist");
+            }
 
 
         }
@@ -407,31 +537,29 @@ namespace SS
                 return false;
         }
 
+
+        /// <summary>
+        /// Cell Class holds evaluted value and the original contents of the cell broken up into their respective types
+        /// <var name="Evaluated">Holds the evaluated double, text or FormulaError</var>
+        /// 
+        /// <var name="text">Holds Text</var>
+        /// 
+        /// <var name="val">Holds Value</var>
+        /// 
+        /// <var name="Formula">Holds a formula</var>
+        /// </summary>
         private class Cell
         {
-            public string var;
+            public object Evaluated;
+            public string text;
             public double val;
             public Formula formula;
             public Cell(string contents)
             {
-                var = contents;
+                text = contents;
 
             }
-            public object GetContents()
-            {
-                if (var != null)
-                {
-                    return var;
-                }
-                else if (formula != null)
-                {
-                    return formula;
-                }
-                else
-                {
-                    return val;
-                }
-            }
+            
             public Cell(double contents)
             {
                 val = contents;
@@ -442,24 +570,55 @@ namespace SS
                 formula = contents;
 
             }
+            /// <summary>
+            /// Gets the contents of the cell
+            /// </summary>
+            /// <returns></returns>
+            public object GetContents()
+            {
+                if (text != null)
+                {
+                    return text;
+                }
+                else if (formula != null)
+                {
+                    return formula;
+                }
+                else
+                {
+                    return val;
+                }
+            }
 
+            /// <summary>
+            /// Changes the contents of a cell to the double
+            /// </summary>
+            /// <param name="d">cell's contents is to be set to d</param>
             public void Change(double d)
             {
-                var = null;
+                text = null;
                 formula = null;
                 val = d;
             }
+            /// <summary>
+            /// Changes the contents of a cell to the Formula
+            /// </summary>
+            /// <param name="d">cell's contents is to be set to f</param>
             public void Change(Formula f)
             {
                 formula = f;
-                var = null;
+                text = null;
                 val = double.NaN;
 
             }
+            /// <summary>
+            /// Changes the contents of a cell to the string
+            /// </summary>
+            /// <param name="d">cell's contents is to be set to s</param>
             public void Change(string s)
             {
                 formula = null;
-                var = s;
+                text = s;
                 val = double.NaN;
             }
 

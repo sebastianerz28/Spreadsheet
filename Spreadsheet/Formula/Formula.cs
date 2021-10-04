@@ -298,7 +298,23 @@ namespace SpreadsheetUtilities
         /// </summary>
         public static bool operator !=(Formula f1, Formula f2)
         {
-            return !(f1.Equals(f2));
+            if(f1 is null && f2 is null)
+            {
+                return false;
+            }
+            else if(f1 is null && !(f2 is null))
+            {
+                return true;
+            }
+            else if(!(f1 is null) && f2 is null)
+            {
+                return true;
+            }
+            else
+            {
+                return !(f1.Equals(f2));
+            }
+            
         }
 
         /// <summary>
