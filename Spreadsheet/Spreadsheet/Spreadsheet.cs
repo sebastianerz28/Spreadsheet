@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.IO;
 
 namespace SS
 {
@@ -122,10 +123,11 @@ namespace SS
                 if (foundSpreadSheet == false)
                     throw new SpreadsheetReadWriteException("Version Not Found");
             }
-            catch (Exception e)
+            catch
             {
-                throw new SpreadsheetReadWriteException(e.ToString());
+                throw new SpreadsheetReadWriteException("Error Getting Saved Version");
             }
+            
             if(v == null)
             {
                 throw new SpreadsheetReadWriteException("version not found");

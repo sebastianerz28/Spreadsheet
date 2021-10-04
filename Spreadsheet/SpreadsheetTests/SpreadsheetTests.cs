@@ -3,6 +3,7 @@ using SpreadsheetUtilities;
 using SS;
 using System;
 using System.Collections.Generic;
+using System.Xml;
 
 namespace SpreadsheetTests
 {
@@ -277,6 +278,31 @@ namespace SpreadsheetTests
             test.SetContentsOfCell("B2", "2.0");
             test.SetContentsOfCell("B3", "3.0");
             test.Save("TestSaveMultipleCells.txt");
+
+            using (XmlWriter writer = XmlWriter.Create("TestSaveMultipleCells.txt")) // NOTICE the file with no path
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "default");
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "B1");
+                writer.WriteElementString("contents", "1.0");
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "B2");
+                writer.WriteElementString("contents", "2.0");
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "B3");
+                writer.WriteElementString("contents", "3.0");
+                writer.WriteEndElement();
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
             Assert.AreEqual("default", test.GetSavedVersion("TestSaveMultipleCells.txt"));
 
         }
@@ -287,6 +313,20 @@ namespace SpreadsheetTests
             test.SetContentsOfCell("B3", "Test");
             Assert.AreEqual("Test", test.GetCellValue("B3"));
             test.Save("ReadBasic.txt");
+            using (XmlWriter writer = XmlWriter.Create("ReadBasic.txt")) // NOTICE the file with no path
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "default");
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "B3");
+                writer.WriteElementString("contents", "Test");
+                writer.WriteEndElement();
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
             AbstractSpreadsheet builtSS = new Spreadsheet("ReadBasic.txt", s=>true, s=>s, "1.0");
             Assert.AreEqual("Test", builtSS.GetCellContents("B3"));
         }
@@ -294,13 +334,20 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         public void TestSavedVersionException()
         {
+
+            using (XmlWriter writer = XmlWriter.Create("nothing.txt")) // NOTICE the file with no path
+            {
+            }
             AbstractSpreadsheet test = new Spreadsheet();
-            test.GetSavedVersion("bogus.txt");
+            test.GetSavedVersion("nothing.txt");
         }
         [TestMethod]
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         public void TestBuildException()
         {
+            using (XmlWriter writer = XmlWriter.Create("bogus.txt")) // NOTICE the file with no path
+            {
+            }
             AbstractSpreadsheet test = new Spreadsheet("bogus.txt", s=>true, s=>s, "1.1");
             
         }
@@ -309,15 +356,44 @@ namespace SpreadsheetTests
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         public void TestNoSpreadSheetTag()
         {
+            using (XmlWriter writer = XmlWriter.Create("NoVersion.txt")) // NOTICE the file with no path
+            {
+                writer.WriteStartDocument();
+                
+                
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A1");
+                writer.WriteElementString("contents", "hello");
+                writer.WriteEndElement();
+
+                
+                writer.WriteEndDocument();
+            }
             AbstractSpreadsheet test = new Spreadsheet();
-            test.GetSavedVersion("SpreadSheetXMLNoSpreadSheetTag.txt");
+            test.GetSavedVersion("NoVersion.txt");
         }
         [TestMethod]
         [ExpectedException(typeof(SpreadsheetReadWriteException))]
         public void TestNoVersion()
         {
+            using (XmlWriter writer = XmlWriter.Create("NoSSTag.txt")) // NOTICE the file with no path
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "A1");
+                writer.WriteElementString("contents", "hello");
+                writer.WriteEndElement();
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
             AbstractSpreadsheet test = new Spreadsheet();
-            test.GetSavedVersion("SpreadSheetXMLNoVersion.txt");
+            test.GetSavedVersion("NoTag.txt");
+            
         }
 
 
@@ -347,6 +423,7 @@ namespace SpreadsheetTests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
         public void TestChanged()
         {
             AbstractSpreadsheet test = new Spreadsheet(s => false, s => s, "base");
