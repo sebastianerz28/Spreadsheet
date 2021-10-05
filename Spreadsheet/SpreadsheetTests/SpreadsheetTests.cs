@@ -430,6 +430,15 @@ namespace SpreadsheetTests
             test.GetCellValue("A1");
 
         }
+        [TestMethod]
+        public void testSetEmpty()
+        {
+            AbstractSpreadsheet s = new Spreadsheet();
+            s.SetContentsOfCell("A1", "2");
+            s.SetContentsOfCell("A1", "");
+            Assert.AreEqual("", s.GetCellContents("A1"));
+            Assert.AreEqual("", s.GetCellValue("A1"));
+        }
 
     }
 }
