@@ -26,6 +26,7 @@ namespace SS
         }
         public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
         {
+
             evaluatedCells = new Dictionary<string, double>();
             dependencies = new DependencyGraph();
             cells = new Dictionary<string, Cell>();
@@ -35,6 +36,7 @@ namespace SS
         }
         public Spreadsheet(string filepath, Func<string, bool> isValid, Func<string, string> normalize, string version) : base(isValid, normalize, version)
         {
+
             evaluatedCells = new Dictionary<string, double>();
             dependencies = new DependencyGraph();
             cells = new Dictionary<string, Cell>();
@@ -55,31 +57,34 @@ namespace SS
                 XmlReader xmlReader = XmlReader.Create(filepath);
                 while (xmlReader.Read())
                 {
-                    if(xmlReader.IsStartElement())
+                    if (xmlReader.IsStartElement())
                     {
-                        
+
                         if (xmlReader.Name == "name")
                         {
                             xmlReader.Read();
                             name = xmlReader.Value;
                         }
-                        
+
                         else if (xmlReader.Name == "contents")
                         {
                             xmlReader.Read();
                             contents = xmlReader.Value;
                             SetContentsOfCell(name, contents);
+                            changed = true;
                         }
-                        
-                    }
-                    
 
+                    }
+
+                    
                 }
             }
             catch
             {
                 throw new SpreadsheetReadWriteException("Spreadsheet could not be built");
             }
+            if (changed == false)
+                throw new SpreadsheetReadWriteException("Spreadsheet not built");
         }
 
         // ADDED FOR PS5
@@ -127,8 +132,8 @@ namespace SS
             {
                 throw new SpreadsheetReadWriteException("Error Getting Saved Version");
             }
-            
-            if(v == null)
+
+            if (v == null)
             {
                 throw new SpreadsheetReadWriteException("version not found");
             }
@@ -157,6 +162,7 @@ namespace SS
         /// SpreadsheetReadWriteException with an explanatory message.
         public override void Save(string filename)
         {
+
             try
             {
                 XmlWriterSettings writerSettings = new XmlWriterSettings();
@@ -188,6 +194,8 @@ namespace SS
             {
                 throw new SpreadsheetReadWriteException("Spreadsheet Exception");
             }
+
+
             changed = false;
         }
         /// <summary>
@@ -198,7 +206,7 @@ namespace SS
         /// </summary>
         public override object GetCellContents(string name)
         {
-            
+
             if (name == null || !(IsValid(Normalize(name))) || !IsVar(name))
                 throw new InvalidNameException();
             else
@@ -241,12 +249,12 @@ namespace SS
         /// </summary>
         public override object GetCellValue(string name)
         {
-            
+
             if (name == null || (!IsValid(name) || !IsVar(name)))
             {
                 throw new InvalidNameException();
             }
-            
+
             else
             {
                 name = Normalize(name);
@@ -297,13 +305,13 @@ namespace SS
         public override IList<string> SetContentsOfCell(string name, string content)
         {
             //Normalize Name
-            
+
             if (content == null)
             {
                 throw new ArgumentNullException("Content is null");
 
             }
-            if (name == null || !IsValid(Normalize(name)) || !IsVar(name))
+            if (name == null || !(IsValid(Normalize(name))) || !IsVar(name))
             {
                 throw new InvalidNameException();
             }
@@ -316,8 +324,8 @@ namespace SS
             }
             else if (content.Length > 0 && content[0] == '=')
             {
-                Formula f = new Formula(content.Trim('='));
-                list = SetCellContents(name, f);
+                Formula f = new Formula(content.Trim('='), Normalize, IsValid);
+                list = SetCellContents(Normalize(name), f);
 
             }
             else
@@ -512,7 +520,7 @@ namespace SS
         /// <returns>Throws exception if evaluated is not a double, returns the double otherwise</returns>
         private double lookup(string cell)
         {
-            if (cells.TryGetValue(cell, out Cell c))
+            if (cells.TryGetValue(Normalize(cell), out Cell c))
             {
                 if (c.Evaluated is double)
                 {
@@ -561,7 +569,7 @@ namespace SS
                 text = contents;
 
             }
-            
+
             public Cell(double contents)
             {
                 val = contents;
