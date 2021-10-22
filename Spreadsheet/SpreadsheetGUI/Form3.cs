@@ -10,14 +10,13 @@ using System.Windows.Forms;
 
 namespace SpreadsheetGUI
 {
-    public partial class Error : Form
+    public partial class Form3 : Form
     {
-        public Error()
+        public Form3()
         {
             InitializeComponent();
         }
 
-         
         private void label1_Click(object sender, EventArgs e)
         {
 

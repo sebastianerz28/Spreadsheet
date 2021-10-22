@@ -310,7 +310,7 @@ namespace SS
                 throw new ArgumentNullException("Content is null");
 
             }
-            if (name == null || !(IsValid(Normalize(name))) || !IsVar(name))
+            if (name == null || (IsValid(Normalize(name))) == false || !IsVar(name))
             {
                 throw new InvalidNameException();
             }

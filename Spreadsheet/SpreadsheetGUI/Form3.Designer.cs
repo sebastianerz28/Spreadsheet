@@ -1,7 +1,7 @@
 ﻿
 namespace SpreadsheetGUI
 {
-    partial class Error
+    partial class Form3
     {
         /// <summary>
         /// Required designer variable.
@@ -21,12 +21,6 @@ namespace SpreadsheetGUI
             base.Dispose(disposing);
         }
 
-        public void setText(string text)
-        {
-            this.errorLabel.Text = text;
-        }
-        
-
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -35,33 +29,35 @@ namespace SpreadsheetGUI
         /// </summary>
         private void InitializeComponent()
         {
-            this.errorLabel = new System.Windows.Forms.Label();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form3));
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // errorLabel
+            // label1
             // 
-            this.errorLabel.AutoSize = true;
-            this.errorLabel.Location = new System.Drawing.Point(32, 38);
-            this.errorLabel.Name = "errorLabel";
-            this.errorLabel.Size = new System.Drawing.Size(0, 13);
-            this.errorLabel.TabIndex = 0;
-            this.errorLabel.Click += new System.EventHandler(this.label1_Click);
+            this.label1.Location = new System.Drawing.Point(13, 27);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(400, 216);
+            this.label1.TabIndex = 0;
+            this.label1.Text = resources.GetString("label1.Text");
+            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
-            // Error
+            // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(183, 120);
-            this.Controls.Add(this.errorLabel);
-            this.Name = "Error";
-            this.Text = "Error";
+            this.ClientSize = new System.Drawing.Size(363, 209);
+            this.Controls.Add(this.label1);
+            this.MaximumSize = new System.Drawing.Size(379, 248);
+            this.MinimumSize = new System.Drawing.Size(379, 248);
+            this.Name = "Form3";
+            this.Text = "Info";
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label errorLabel;
+        private System.Windows.Forms.Label label1;
     }
 }
