@@ -14,6 +14,7 @@ namespace SpreadsheetGUI
     public partial class Form1 : Form
     {
         private readonly string defaultExtension = ".sprd";
+        //Backing spreadsheet
         private Spreadsheet spreadsheet;
         private bool showAllFiles;
         public Form1()
@@ -204,6 +205,9 @@ namespace SpreadsheetGUI
             }
 
         }
+        /// <summary>
+        /// Helper method for both buttons that save
+        /// </summary>
         private void save()
         {
 
@@ -298,7 +302,11 @@ namespace SpreadsheetGUI
             }
             return s;
         }
-
+        /// <summary>
+        /// Displays Info panel
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void infoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Form3 f = new Form3();
