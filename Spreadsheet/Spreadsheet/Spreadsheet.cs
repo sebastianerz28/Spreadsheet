@@ -185,6 +185,7 @@ namespace SS
                     xmlWriter.WriteEndElement();
                 }
                 xmlWriter.WriteEndElement();
+                xmlWriter.WriteEndDocument();
                 xmlWriter.Dispose();
 
             }

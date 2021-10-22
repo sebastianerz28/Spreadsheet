@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>767eac1f-e018-4e34-b4d6-3fbc5c63471a</ProjectGuid>
+    <ProjectGuid>9f570f51-dbd2-4d85-bea6-8039bf14fe56</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>WindowsFormsControlLibrary1</RootNamespace>
-    <AssemblyName>WindowsFormsControlLibrary1</AssemblyName>
+    <RootNamespace>SpreadsheetPanel</RootNamespace>
+    <AssemblyName>SpreadsheetPanel</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>

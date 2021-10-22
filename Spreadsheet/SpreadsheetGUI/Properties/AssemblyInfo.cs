@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WindowsFormsControlLibrary1")]
+[assembly: AssemblyTitle("SpreadsheetGUI")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WindowsFormsControlLibrary1")]
+[assembly: AssemblyProduct("SpreadsheetGUI")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("767eac1f-e018-4e34-b4d6-3fbc5c63471a")]
+[assembly: Guid("25f009e1-e514-44a8-966d-1fdead6249f9")]
 
 // Version information for an assembly consists of the following four values:
 //
