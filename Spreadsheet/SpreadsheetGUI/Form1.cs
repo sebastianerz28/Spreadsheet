@@ -92,11 +92,26 @@ namespace SpreadsheetGUI
             string filename = saveFileDialog.FileName;
             if (filename.EndsWith(defaultExtension))
             {
-                spreadsheet.Save(filename);
+                try
+                {
+                    spreadsheet.Save(filename);
+                }
+                catch (Exception s)
+                {
+                    MessageBox.Show("Error Saving spreadsheet");
+                }
+                
             }
             else
             {
-                spreadsheet.Save(filename + defaultExtension);
+                try
+                {
+                    spreadsheet.Save(filename);
+                }
+                catch (Exception s)
+                {
+                    MessageBox.Show("Error Saving spreadsheet");
+                }
             }
 
 
@@ -129,23 +144,37 @@ namespace SpreadsheetGUI
             string filename = openFileDialog1.FileName;
             if (filename.EndsWith(defaultExtension))
             {
-                if (spreadsheet.GetSavedVersion(filename) == "ps6")
+                try
                 {
-                    Spreadsheet newSpread = new Spreadsheet(filename, s => Regex.IsMatch(s, @"[A-Z][1-9][0-9]?"), s => s.ToUpper(), "ps6");
-                    spreadsheet = newSpread;
-                    foreach(string cell in newSpread.GetNamesOfAllNonemptyCells())
+                    if (spreadsheet.GetSavedVersion(filename) == "ps6")
                     {
-                        int c = cell[0] - 65;
-                        int r = int.Parse(getRow(cell)) - 1;
-                        this.spreadsheetPanel1.SetValue(c, r, spreadsheet.GetCellValue(cell).ToString());
+                        try
+                        {
+                            Spreadsheet newSpread = new Spreadsheet(filename, s => Regex.IsMatch(s, @"[A-Z][1-9][0-9]?"), s => s.ToUpper(), "ps6");
+                            spreadsheet = newSpread;
+                            foreach (string cell in newSpread.GetNamesOfAllNonemptyCells())
+                            {
+                                int c = cell[0] - 65;
+                                int r = int.Parse(getRow(cell)) - 1;
+                                this.spreadsheetPanel1.SetValue(c, r, spreadsheet.GetCellValue(cell).ToString());
+                            }
+                        }
+                        catch (Exception o)
+                        {
+                            MessageBox.Show("Error Reading Spreadsheet");
+                        }
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("Version is not ps6");
                     }
                 }
-                else
+                catch(Exception o)
                 {
-                    Error f = new Error();
-                    f.setText("Version is not ps6");
-                    f.Show();
+                    MessageBox.Show("Error getting saved version");
                 }
+                
                 
             }
             else
@@ -165,9 +194,7 @@ namespace SpreadsheetGUI
                     }
                     else
                     {
-                        Error f = new Error();
-                        f.setText("Version is not ps6");
-                        f.Show();
+                        MessageBox.Show("Version is not ps6");
                     }
                 }
                 catch (SpreadsheetReadWriteException)
