@@ -36,6 +36,7 @@ namespace SpreadsheetGUI
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FileButton = new System.Windows.Forms.ToolStripMenuItem();
             this.openMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,7 +50,6 @@ namespace SpreadsheetGUI
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.contentsOfCellLabel = new System.Windows.Forms.Label();
             this.changeCellContentsButton = new System.Windows.Forms.Button();
-            this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -107,6 +107,7 @@ namespace SpreadsheetGUI
             this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
             this.newToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.newToolStripMenuItem.Text = "New";
+            this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click_1);
             // 
             // closeToolStripMenuItem
             // 
@@ -115,6 +116,13 @@ namespace SpreadsheetGUI
             this.closeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
+            // 
+            // infoToolStripMenuItem
+            // 
+            this.infoToolStripMenuItem.Name = "infoToolStripMenuItem";
+            this.infoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.infoToolStripMenuItem.Text = "Info";
+            this.infoToolStripMenuItem.Click += new System.EventHandler(this.infoToolStripMenuItem_Click);
             // 
             // FileButton
             // 
@@ -158,7 +166,7 @@ namespace SpreadsheetGUI
             this.NewMenuItem.Name = "NewMenuItem";
             this.NewMenuItem.Size = new System.Drawing.Size(103, 22);
             this.NewMenuItem.Text = "New";
-            this.NewMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
+            
             // 
             // openFileDialog1
             // 
@@ -210,13 +218,6 @@ namespace SpreadsheetGUI
             this.changeCellContentsButton.Text = "Change Contents of Selected Cell";
             this.changeCellContentsButton.UseVisualStyleBackColor = true;
             this.changeCellContentsButton.Click += new System.EventHandler(this.changeCellContentsButton_Click);
-            // 
-            // infoToolStripMenuItem
-            // 
-            this.infoToolStripMenuItem.Name = "infoToolStripMenuItem";
-            this.infoToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.infoToolStripMenuItem.Text = "Info";
-            this.infoToolStripMenuItem.Click += new System.EventHandler(this.infoToolStripMenuItem_Click);
             // 
             // Form1
             // 

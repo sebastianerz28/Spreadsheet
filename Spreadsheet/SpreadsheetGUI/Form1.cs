@@ -51,7 +51,8 @@ namespace SpreadsheetGUI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void newToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             SpreadsheetApplicationContext.getAppContext().RunForm(new Form1());
         }
@@ -81,7 +82,7 @@ namespace SpreadsheetGUI
             {
                 saveFileDialog.Filter = "";
             }
-            saveFileDialog.CheckFileExists = true;
+            saveFileDialog.CheckFileExists = false;
             saveFileDialog.CheckPathExists = true;
             saveFileDialog.FileName = "untitled";
             saveFileDialog.DefaultExt = "sprd";
@@ -109,7 +110,7 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Console.WriteLine(showAllFiles);
+           
             if (showAllFiles == true)
             {
                 openFileDialog1.Filter = "Speadsheet files|*.sprd";
@@ -118,7 +119,7 @@ namespace SpreadsheetGUI
             {
                 openFileDialog1.Filter = "";
             }
-            openFileDialog1.CheckFileExists = true;
+            openFileDialog1.CheckFileExists = false;
             openFileDialog1.CheckPathExists = true;
             openFileDialog1.FileName = "untitled";
             openFileDialog1.DefaultExt = "sprd";
@@ -312,5 +313,7 @@ namespace SpreadsheetGUI
             Form3 f = new Form3();
             f.Show();
         }
+
+        
     }
 }
